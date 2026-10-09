@@ -10,6 +10,10 @@ A real-time platform that watches whether a forecasting model's **prediction int
 
 > A forecast that says "90% interval" should contain the truth 90% of the time. When reality drifts, that promise silently breaks. This system makes the break visible, measurable, and self-correcting.
 
+![Forecast Calibration Monitor demo](docs/demo.gif)
+
+> Live: calibrated coverage → injected drift drops PICP and fires an alert → Adaptive Conformal Prediction widens intervals and coverage recovers.
+
 ---
 
 ## Features

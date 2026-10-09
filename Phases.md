@@ -27,7 +27,7 @@
 - [x] **Prometheus `/metrics` endpoint** - root `/metrics` exposition, per-sensor PICP/MAE/MPIW/q gauges computed at scrape time (`routers/prometheus.py`)
 
 ### Phase 5: Polish & Deploy [Day 7]
-- [ ] Add Demo GIF to README (`docs/demo.gif`)
+- [~] Demo GIF to README (`docs/demo.gif`) - driver script (`scripts/demo_drive.sh`) + README wiring + recording guide done; drop in the recorded `docs/demo.gif`
 - [x] **Deploy on Render** - `render.yaml` Blueprint (Postgres + Redis + API w/ in-process worker + static frontend); free-tier layout
 - [ ] Add badges: Build Passing, Coverage 85%, Docker Ready
 - [ ] Write final README with Architecture Diagram
