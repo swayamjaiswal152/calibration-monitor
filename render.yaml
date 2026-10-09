@@ -2,9 +2,10 @@
 # Dashboard -> New -> Blueprint -> connect this repo, or `render blueprint launch`.
 #
 # Free-tier layout: the drift worker runs in-process inside the API
-# (RUN_WORKER_IN_PROCESS=true) because Render's free plan has no Background
-# Workers. To decouple it, add a `type: worker` service with the same Docker
-# build and `dockerCommand: python -m app.worker` (requires a paid instance).
+# (RUN_WORKER_IN_PROCESS=true) as a daemon thread, because Render's free plan
+# has no Background Workers. To decouple it, add a `type: worker` service with
+# the same Docker build and `dockerCommand: python -m app.worker` (requires a
+# paid instance).
 
 databases:
   - name: calib-db
