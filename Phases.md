@@ -29,7 +29,7 @@
 ### Phase 5: Polish & Deploy [Day 7]
 - [ ] Add Demo GIF to README (`docs/demo.gif`)
 - [x] **Deploy on Render** - `render.yaml` Blueprint (Postgres + Redis + API w/ in-process worker + static frontend); free-tier layout
-- [ ] Add badges: Build Passing, Coverage 85%, Docker Ready
+- [x] **Badges** - CI/Build, Coverage (63%, measured), License (MIT), Live Demo, Docker, stack
 - [ ] Write final README with Architecture Diagram
 
 ### Resume Bullets - Use This

@@ -1,6 +1,9 @@
 # Forecast Calibration Monitor
 
 [![CI](https://github.com/swayamjaiswal152/calibration-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/swayamjaiswal152/calibration-monitor/actions/workflows/ci.yml)
+![Coverage](https://img.shields.io/badge/coverage-63%25-yellow)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://calib-frontend.onrender.com)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-async-009688)
 ![React](https://img.shields.io/badge/React-18%20%2B%20Vite-61dafb)
