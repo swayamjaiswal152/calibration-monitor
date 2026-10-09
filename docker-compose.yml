@@ -1,0 +1,62 @@
+# docker-compose.yml
+services:
+  db:
+    image: timescale/timescaledb:latest-pg15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: calibration
+    ports: [ "5432:5432" ]
+    volumes: [ pgdata:/var/lib/postgresql/data ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d calibration" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: [ "6379:6379" ]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    ports: [ "8000:8000" ]
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/calibration
+      REDIS_URL: redis://redis:6379/0
+      TARGET_COVERAGE: 0.9
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  worker:
+    # NEW: Decoupled background job
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/calibration
+      REDIS_URL: redis://redis:6379/0
+      PYTHONUNBUFFERED: "1"
+    command: python -m app.worker
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports: [ "5173:5173" ]
+    depends_on: [ api ]
+
+volumes:
+  pgdata:
