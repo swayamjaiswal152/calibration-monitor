@@ -69,6 +69,57 @@ def test_drift_sensor_persists_alert_with_is_active(session):
     assert "metrics_channel" in events
 
 
+def test_drift_alert_is_not_duplicated_across_cycles(session):
+    db = session
+    t0 = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
+    for i in range(10):
+        _add_pair(db, "bad", pred=25, lower=21, upper=29, y_true=40,
+                  t=t0 + datetime.timedelta(hours=i))
+    db.commit()
+
+    # Three consecutive worker cycles on a persistently-drifted sensor
+    first = check_sensors(db, publish=lambda ch, msg: None)
+    second = check_sensors(db, publish=lambda ch, msg: None)
+    third = check_sensors(db, publish=lambda ch, msg: None)
+
+    # Only the first cycle creates the alert; later cycles are suppressed
+    assert first == ["bad"]
+    assert second == [] and third == []
+    assert db.query(models.Alert).count() == 1
+
+
+def test_recovery_resolves_alert_and_allows_refire(session):
+    db = session
+    t0 = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
+    for i in range(10):
+        _add_pair(db, "bad", pred=25, lower=21, upper=29, y_true=40,
+                  t=t0 + datetime.timedelta(hours=i))
+    db.commit()
+
+    assert check_sensors(db, publish=lambda ch, msg: None) == ["bad"]
+    assert db.query(models.Alert).filter_by(is_active=True).count() == 1
+
+    # Sensor recovers: add enough calibrated pairs to lift coverage above 85%
+    for i in range(10, 200):
+        _add_pair(db, "bad", pred=25, lower=21, upper=29, y_true=25,
+                  t=t0 + datetime.timedelta(hours=i))
+    db.commit()
+
+    check_sensors(db, publish=lambda ch, msg: None)
+    # The open alert is resolved; none active
+    assert db.query(models.Alert).filter_by(is_active=True).count() == 0
+    assert db.query(models.Alert).count() == 1  # history preserved, no new alert
+
+    # Drift again: a brand-new alert fires since the previous one was resolved
+    for i in range(200, 400):
+        _add_pair(db, "bad", pred=25, lower=21, upper=29, y_true=40,
+                  t=t0 + datetime.timedelta(hours=i))
+    db.commit()
+    assert check_sensors(db, publish=lambda ch, msg: None) == ["bad"]
+    assert db.query(models.Alert).filter_by(is_active=True).count() == 1
+    assert db.query(models.Alert).count() == 2
+
+
 def test_no_alert_when_all_calibrated(session):
     db = session
     t0 = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
