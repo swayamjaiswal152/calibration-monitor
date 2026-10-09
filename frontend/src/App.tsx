@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
-import { api } from './api'
+import { api, wsUrl } from './api'
 import WhatIfSimulator from './components/WhatIfSimulator'
 import ConformalPanel from './components/ConformalPanel'
 
@@ -17,7 +17,7 @@ export default function App() {
   }
 
     useEffect(() => {
-        const ws = new WebSocket(`ws://${window.location.hostname}:8000/ws/metrics`)
+        const ws = new WebSocket(wsUrl('/ws/metrics'))
         ws.onmessage = (e) => {
             const msg = JSON.parse(e.data)
             if (msg.event === 'metrics_update') {
