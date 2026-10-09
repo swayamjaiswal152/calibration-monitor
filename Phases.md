@@ -24,7 +24,7 @@
 - [x] **Feature 1: Adaptive Conformal Prediction** - `conformal.py` + `conformal_state` table + `GET /conformal/state` + Panel UI
 - [x] **Feature 2: Slack / Webhook Alerts** - `slack.py` with Slack Block Kit + env `SLACK_WEBHOOK_URL`
 - [x] **Feature 3: What-If Simulator** - Slider + `POST /whatif` preview endpoint + inject button
-- [ ] Next: Add Prometheus `/metrics` endpoint
+- [x] **Prometheus `/metrics` endpoint** - root `/metrics` exposition, per-sensor PICP/MAE/MPIW/q gauges computed at scrape time (`routers/prometheus.py`)
 
 ### Phase 5: Polish & Deploy [Day 7]
 - [ ] Add Demo GIF to README (`docs/demo.gif`)

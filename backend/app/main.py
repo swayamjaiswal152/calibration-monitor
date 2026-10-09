@@ -3,7 +3,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from .database import Base, async_engine
-from .routers import forecasts, actuals, metrics, simulate, conformal
+from .routers import forecasts, actuals, metrics, simulate, conformal, prometheus
 from .websocket_manager import manager
 
 # Lightweight idempotent migrations run on startup (project has no Alembic).
@@ -34,6 +34,8 @@ app.include_router(actuals.router, prefix="/api/v1")
 app.include_router(metrics.router, prefix="/api/v1")
 app.include_router(simulate.router, prefix="/api/v1")
 app.include_router(conformal.router, prefix="/api/v1")
+# Prometheus scrape target mounted at root (/metrics) per convention, no /api/v1 prefix
+app.include_router(prometheus.router)
 
 @app.websocket("/ws/metrics")
 async def ws_endpoint(ws: WebSocket):
