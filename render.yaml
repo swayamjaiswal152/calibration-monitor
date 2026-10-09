@@ -56,11 +56,12 @@ services:
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
     envVars:
-      - key: VITE_API_URL     # bare host; api.ts normalises to https/wss
-        fromService:
-          type: web
-          name: calib-api
-          property: host
+      # Must be the API's PUBLIC origin, baked in at build time. Render's
+      # fromService `host` returns the internal name (calib-api), which the
+      # browser can't resolve — so set the public URL explicitly. Update this
+      # if the API service is renamed or gets a different domain.
+      - key: VITE_API_URL
+        value: https://calib-api.onrender.com
     routes:
       - type: rewrite
         source: /*
