@@ -79,6 +79,25 @@ curl -X POST "http://localhost:8000/api/v1/simulate/whatif?drift=5"
 
 ---
 
+## Deploy to Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/swayamjaiswal152/calibration-monitor)
+
+The repo ships a [`render.yaml`](./render.yaml) Blueprint that provisions the whole stack:
+
+| Service | Type | Plan |
+|---|---|---|
+| `calib-db` | PostgreSQL | free |
+| `calib-redis` | Key Value (Redis) | free |
+| `calib-api` | Docker web service (API **+ in-process drift worker**) | free |
+| `calib-frontend` | Static site (Vite build) | free |
+
+**Steps:** Render Dashboard → **New → Blueprint** → connect this repo. Render reads `render.yaml`, wires `DATABASE_URL`/`REDIS_URL`/`VITE_API_URL` between services automatically, and deploys. Optionally set `SLACK_WEBHOOK_URL` on the `calib-api` service to enable Slack alerts.
+
+> **Free-tier note:** Render's free plan has no Background Workers, so the drift loop runs as an in-process daemon thread inside the API (`RUN_WORKER_IN_PROCESS=true`). To restore the fully decoupled architecture, add a `type: worker` service running `python -m app.worker` (requires a paid instance). Free services also sleep after inactivity, so the first request after idle incurs a cold start.
+
+---
+
 ## API Reference
 
 Base path: `/api/v1`

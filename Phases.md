@@ -28,7 +28,7 @@
 
 ### Phase 5: Polish & Deploy [Day 7]
 - [ ] Add Demo GIF to README (`docs/demo.gif`)
-- [ ] Deploy on Render / Fly.io / Railway
+- [x] **Deploy on Render** - `render.yaml` Blueprint (Postgres + Redis + API w/ in-process worker + static frontend); free-tier layout
 - [ ] Add badges: Build Passing, Coverage 85%, Docker Ready
 - [ ] Write final README with Architecture Diagram
 

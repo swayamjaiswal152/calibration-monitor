@@ -1,3 +1,5 @@
+import os
+import threading
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,6 +25,13 @@ async def lifespan(app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
         for stmt in MIGRATIONS:
             await conn.execute(text(stmt))
+    # On single-instance deploys (e.g. Render free tier) there is no separate
+    # worker container, so optionally run the drift loop as a daemon thread.
+    # The worker's Redis lock keeps it single-runner even if this is ever scaled.
+    if os.getenv("RUN_WORKER_IN_PROCESS", "").lower() in ("1", "true", "yes"):
+        from .worker import run_loop
+        threading.Thread(target=run_loop, daemon=True, name="drift-worker").start()
+        print("[API] In-process drift worker started (RUN_WORKER_IN_PROCESS)")
     yield
 
 app = FastAPI(title="Forecast Calibration Monitor - Stateless API", lifespan=lifespan)

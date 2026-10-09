@@ -1,3 +1,4 @@
+import os
 import time
 import json
 from redis import Redis
@@ -5,10 +6,12 @@ from sqlalchemy import text
 from .database import SyncSessionLocal
 from .slack import send_slack_alert
 
-# This runs as a SEPARATE container: python -m app.worker
-# Fixes: 4 uvicorn workers would have created 4 duplicate schedulers
+# This runs as a SEPARATE container (`python -m app.worker`) in Docker Compose,
+# or as an in-process daemon thread inside the API when RUN_WORKER_IN_PROCESS is
+# set (single-instance free-tier deploys). The Redis lock keeps it single-runner
+# either way.
 
-r = Redis.from_url("redis://redis:6379/0", decode_responses=True)
+r = Redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"), decode_responses=True)
 TARGET = 0.9
 EPSILON = 0.05
 
