@@ -48,7 +48,17 @@ def check_sensors(db, publish=None):
         if publish:
             publish("metrics_channel", json.dumps({"event": "metrics_update", "data": {**m, "sensor_id": sid}}))
 
+        # Edge-triggered alerting: fire once on the transition INTO drift and
+        # resolve the open alert on recovery, instead of re-alerting every 15s
+        # loop while coverage stays low (which spammed the timeline).
+        has_active_alert = db.execute(
+            text("SELECT 1 FROM alerts WHERE sensor_id = :sid AND is_active = true LIMIT 1"),
+            {"sid": sid},
+        ).first() is not None
+
         if is_drift(m["picp"]):
+            if has_active_alert:
+                continue  # already alerting on this drift episode; don't duplicate
             if publish:
                 publish("metrics_channel", json.dumps({"event": "alert", "data": {**m, "sensor_id": sid}}))
             send_slack_alert(sid, m["picp"])
@@ -58,6 +68,14 @@ def check_sensors(db, publish=None):
             db.commit()
             drifted.append(sid)
             print(f"[WORKER] Drift detected on {sid}: {m['picp']:.2%}")
+        elif has_active_alert:
+            # Recovered above threshold: close open alerts so a future drift re-fires
+            db.execute(text("UPDATE alerts SET is_active = false WHERE sensor_id = :sid AND is_active = true"),
+                       {"sid": sid})
+            db.commit()
+            if publish:
+                publish("metrics_channel", json.dumps({"event": "recovered", "data": {**m, "sensor_id": sid}}))
+            print(f"[WORKER] {sid} recovered: {m['picp']:.2%}")
     return drifted
 
 def run_loop():
