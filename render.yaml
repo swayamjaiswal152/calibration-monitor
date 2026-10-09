@@ -10,7 +10,8 @@
 databases:
   - name: calib-db
     databaseName: calibration
-    user: postgres
+    # user omitted: Render auto-generates one (it reserves "postgres"). The API
+    # reads the full connection string via fromDatabase, so the name is moot.
     plan: free
 
 services:
